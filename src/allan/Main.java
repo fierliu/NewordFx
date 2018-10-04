@@ -1,5 +1,6 @@
 package allan;
 
+import controller.MyController;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -10,7 +11,7 @@ public class Main extends Application{
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		try{
-			FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("/allan/MyScene.fxml"));
+			FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("/fxml/MyScene.fxml"));
 			Parent root = fxmlloader.load();
 			primaryStage.setTitle("Neword");
 			primaryStage.setScene(new Scene(root));
