@@ -10,6 +10,7 @@ import org.jdom2.JDOMException;
 import controller.MyController;
 
 public class ParseTXT {
+    //该方法用于从txt上下格式词库转化到xml格式词库中
 	public void parseTxt(String path) throws JDOMException, IOException{
 		ParseXml ph = new ParseXml();
 		String _fileName = path.substring(path.lastIndexOf("\\")+1);//截取词库文件名
@@ -27,23 +28,43 @@ public class ParseTXT {
 		MyController mc = new MyController();
 		mc.showInfo("词库导入完成！");
 	}
-	public ArrayList<String> readLinedFile(String filename){
-		ArrayList<String> filecon = new ArrayList<String>();
-		  String m = "";
-		  BufferedReader file = null;
-		  try{
-		   file = new BufferedReader(new FileReader(filename));
-		   while ((m = file.readLine()) != null) {
-		    if (!m.equals("")) // 不需要读取空行
-		    {
-		     filecon.add(m);
-		    }
-		   }
-		   file.close();
-		  }catch(IOException e){
-		   e.printStackTrace();
-		  }
+    public ArrayList<String> readLinedFile(String filename){
+        ArrayList<String> filecon = new ArrayList<String>();
+        String m = "";
+        BufferedReader file = null;
+        try{
+            file = new BufferedReader(new FileReader(filename));
+            while ((m = file.readLine()) != null) {
+                if (!m.equals("")) // 不需要读取空行
+                {
+                    filecon.add(m);
+                }
+            }
+            file.close();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
 
-		  return filecon;
-		 }
+        return filecon;
+    }
+
+//    从txt上下格式词库转化到数据库中
+    public static void txtToSqlite(){
+	    String path = "";
+        ParseXml ph = new ParseXml();
+        String _fileName = path.substring(path.lastIndexOf("\\")+1);//截取词库文件名
+        String fileName = _fileName.substring(0, (_fileName.length()-5));//去掉.HTML后缀
+        System.out.println("ParseTXT上下格式文件名称："+fileName);
+        ArrayList<String> al = new ParseTXT().readLinedFile(path);
+
+        for(Integer i = 0; i< al.size(); i=i+2){
+//			System.out.println("i="+ al.get(i));
+//			System.out.println("i+1="+ al.get(i+1));
+            Integer id = i/2 +1;//al.get(i) is english, al.get(i+1) is meaning.
+//            ph.creatXml(id.toString(), al.get(i), al.get(i+1), fileName, "-1", "0");
+        }
+    }
+    public static void main(String[] args) {
+
+    }
 }

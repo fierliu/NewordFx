@@ -17,8 +17,8 @@
             <Button fx:id="btnNext" disable="true" layoutX="354.0" layoutY="345.0" mnemonicParsing="false" onAction="#btnUnknowHandler" prefHeight="30.0" prefWidth="276.0" text="不认识" />
             <Button fx:id="btnMemorized" disable="true" layoutX="354.0" layoutY="378.0" mnemonicParsing="false" onAction="#btnMemorizedHandler" prefHeight="30.0" prefWidth="276.0" text="GOT IT" />
             <Label fx:id="lbQuota" layoutX="727.0" layoutY="168.0" prefHeight="46.0" prefWidth="49.0" text="词汇总量" visible="false" />
-            <Label fx:id="lbTotalCount" layoutX="639.0" layoutY="214.0" prefHeight="27.0" prefWidth="76.0" text="This Time" />
-            <Label fx:id="lbLearned" layoutX="701.0" layoutY="323.0" prefHeight="24.0" prefWidth="38.0" />
+            <Label fx:id="lbTotalCount" layoutX="639.0" layoutY="214.0" prefHeight="27.0" prefWidth="76.0" style="-fx-background-color: #ccffcc;" text="This Time" />
+            <Label fx:id="lbLearned" layoutX="701.0" layoutY="323.0" prefHeight="24.0" prefWidth="38.0" style="-fx-background-color: #ccffcc;" />
             <ToolBar layoutY="27.0" prefHeight="30.0" prefWidth="800.0">
                <items>
                   <Button fx:id="btnStart" mnemonicParsing="false" onAction="#btnStartHandler" prefHeight="25.0" prefWidth="55.0" text="start" />
@@ -56,20 +56,20 @@
               </menus>
             </MenuBar>
             <Button fx:id="btnKnown" disable="true" layoutX="54.0" layoutY="345.0" mnemonicParsing="false" onAction="#btnKnownHandler" prefHeight="30.0" prefWidth="286.0" text="认识" />
-            <Label layoutX="638.0" layoutY="323.0" prefHeight="27.0" prefWidth="63.0" text="Learned:" />
-            <Label layoutX="31.0" layoutY="460.0" prefHeight="24.0" prefWidth="95.0" text="Vocabulary: " />
-            <Label fx:id="lbVocName" layoutX="125.0" layoutY="460.0" prefHeight="24.0" prefWidth="497.0" />
-            <Label fx:id="lbUser" layoutX="642.0" layoutY="100.0" prefHeight="27.0" prefWidth="36.0" text="User" />
-            <Label layoutX="642.0" layoutY="134.0" prefHeight="27.0" prefWidth="27.0" text="ID: " />
-            <Label fx:id="lbUid" layoutX="670.0" layoutY="134.0" prefHeight="27.0" prefWidth="38.0" />
-            <Label layoutX="31.0" layoutY="497.0" prefHeight="24.0" prefWidth="95.0" text="Voc Size: " />
-            <Label fx:id="lbAmount" layoutX="125.0" layoutY="497.0" prefHeight="24.0" prefWidth="173.0" />
-            <Label fx:id="lbTodayAmount" layoutX="685.0" layoutY="245.0" prefHeight="27.0" prefWidth="62.0" />
+            <Label layoutX="638.0" layoutY="323.0" prefHeight="27.0" prefWidth="63.0" style="-fx-background-color: #ccffcc;" text="Learned:" />
+            <Label layoutX="31.0" layoutY="460.0" prefHeight="24.0" prefWidth="95.0" style="-fx-background-color: #ccffcc;" text="Vocabulary: " />
+            <Label fx:id="lbVocName" layoutX="125.0" layoutY="460.0" prefHeight="24.0" prefWidth="497.0" style="-fx-background-color: #ccffcc;" />
+            <Label fx:id="lbUser" layoutX="642.0" layoutY="100.0" prefHeight="27.0" prefWidth="36.0" style="-fx-background-color: #ccffcc;" text="User" />
+            <Label layoutX="642.0" layoutY="134.0" prefHeight="27.0" prefWidth="27.0" style="-fx-background-color: #ccffcc;" text="ID: " />
+            <Label fx:id="lbUid" layoutX="670.0" layoutY="134.0" prefHeight="27.0" prefWidth="38.0" style="-fx-background-color: #ccffcc;" />
+            <Label layoutX="31.0" layoutY="497.0" prefHeight="24.0" prefWidth="95.0" style="-fx-background-color: #ccffcc;" text="Voc Size: " />
+            <Label fx:id="lbAmount" layoutX="125.0" layoutY="497.0" prefHeight="24.0" prefWidth="173.0" style="-fx-background-color: #ccffcc;" />
+            <Label fx:id="lbTodayAmount" layoutX="685.0" layoutY="245.0" prefHeight="27.0" prefWidth="62.0" style="-fx-background-color: #ccffcc;" />
             <Label layoutX="638.0" layoutY="352.0" prefHeight="27.0" prefWidth="66.0" text="Reviewed:" />
             <Label fx:id="lbReviewed" layoutX="704.0" layoutY="352.0" prefHeight="27.0" prefWidth="66.0" />
-            <Label layoutX="639.0" layoutY="245.0" prefHeight="27.0" prefWidth="45.0" text="New: " />
-            <Label layoutX="639.0" layoutY="274.0" prefHeight="27.0" prefWidth="65.0" text="Review: " />
-            <Label fx:id="lbReviewAmount" layoutX="704.0" layoutY="274.0" prefHeight="27.0" prefWidth="55.0" />
+            <Label layoutX="639.0" layoutY="245.0" prefHeight="27.0" prefWidth="45.0" style="-fx-background-color: #ccffcc;" text="New: " />
+            <Label layoutX="639.0" layoutY="274.0" prefHeight="27.0" prefWidth="65.0" style="-fx-background-color: #ccffcc;" text="Review: " />
+            <Label fx:id="lbReviewAmount" layoutX="704.0" layoutY="274.0" prefHeight="27.0" prefWidth="55.0" style="-fx-background-color: #ccffcc;" />
          </children>
       </Pane>
    </children>

@@ -7,13 +7,12 @@
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.6.20.1.jar"/>
-	<classpathentry kind="lib" path="D:/IT/GUI/Newword Lib/NewWordFx xml/lib/jsoup-1.10.3.jar"/>
-	<classpathentry kind="lib" path="D:/IT/GUI/Newword Lib/NewWordFx xml/lib/sqlite-jdbc-3.6.20.1.jar"/>
-	<classpathentry kind="lib" path="D:/IT/GUI/Newword Lib/NewWordFx xml/lib/sqlite-jdbc-3.8.10.1.jar"/>
-	<classpathentry kind="lib" path="D:/IT/GUI/EyePro/eyePro/EyePro_lib/jdom-2.0.5.jar"/>
-	<classpathentry kind="lib" path="D:/IT/GUI/EyePro/eyePro/EyePro_lib/jdom-2.0.5-contrib.jar"/>
-	<classpathentry kind="lib" path="D:/IT/GUI/EyePro/eyePro/EyePro_lib/jdom-2.0.5-javadoc.jar"/>
-	<classpathentry kind="lib" path="D:/IT/GUI/EyePro/eyePro/EyePro_lib/jdom-2.0.5-junit.jar"/>
-	<classpathentry kind="lib" path="D:/IT/GUI/EyePro/eyePro/EyePro_lib/jdom-2.0.5-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jdom-2.0.5-contrib.jar"/>
+	<classpathentry kind="lib" path="lib/jdom-2.0.5-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/jdom-2.0.5-junit.jar"/>
+	<classpathentry kind="lib" path="lib/jdom-2.0.5-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jdom-2.0.5.jar"/>
+	<classpathentry kind="lib" path="lib/jsoup-1.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.8.10.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

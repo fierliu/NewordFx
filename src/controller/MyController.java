@@ -6,16 +6,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
 
+import dao.*;
+import model.*;
 import org.jdom2.JDOMException;
 
-import dao.PropertyDao;
-import dao.WordDao;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -40,119 +36,100 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import model.Property;
-import model.Word;
 import tool.GetAmount;
 import tool.GetVocList;
 import tool.ParseHTML;
 import tool.ParseTXT;
 import tool.ParseXml;
-
+/*
+* todo 可以把业务逻辑放到另外一个类中
+* */
 public class MyController implements Initializable{
-	WordDao wd = new WordDao();
-	PropertyDao pd = new PropertyDao();
+//	PropertyDao pd = new PropertyDao();
+	WordDaoImpl wordDao;
+	UserDao userDao;
+	User user;
+	UserWord word;
 	final FileChooser fileChooser = new FileChooser();
 	int count = 1;
+//	HashSet<Integer> reviewSet;
+	HashSet<Integer> newSet;
 	@FXML
-	private Button btnCh, btnKnown, btnMemorized, btnStart, btnUnknow;
+	private Button btnCh, btnKnown, btnMemorized, btnStart, btnNext;
 	@FXML
-	private Label lbCh, lbEn, lbHide, lbQuota, lbTotalCount, lbLearned, lbVocName, lbUser,
-		lbId, lbAmount, lbTodayAmount, lbWordId, lbWordKnow;
+	private Label lbCh, lbEn, lbHide, lbQuota, lbTotalCount,  lbVocName, lbUser, lbWordKnow,
+			lbUid, lbAmount/*词库总词量*/,
+			lbTodayAmount, lbLearned, lbReviewAmount, lbReviewed;
 	@FXML
 	private MenuItem importTxt1, importTxt2, importHtml, aboutImport, setQuota, chooseVoc;
 	private Stage stage;
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
-		//读取配置文件
-		PropertyDao propDao = new PropertyDao();
-		try {
-			Property prop = propDao.getProperty("1");
-			String quota = prop.getQuota();
-			String vocName = prop.getVocName();
-			String name = prop.getName();
-			String id = prop.getId();
-			String total = prop.getTotal();
-			lbVocName.setText(vocName);
-			lbQuota.setText(quota);
-			lbUser.setText(name);
-			lbId.setText(id);
-			lbAmount.setText(total);
-			lbLearned.setText("0");
-		} catch (JDOMException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		//初始化对象
+		wordDao = new WordDaoImpl();
+		userDao = new UserDaoImpl();
+		user = userDao.load("1");//在实现登录功能之前，默认使用uid = 1的帐户
+		//设置主界面初始值
+		lbVocName.setText(user.getVocName().split("_")[0]);
+		lbUser.setText(user.getUsername());
+		lbUid.setText(user.getUid());
+		lbAmount.setText(user.getTotal());
 	}
 	public void setStage(Stage stage){
 		this.stage = stage;
 	}
 //	“释意”按键监听
-	public void btnChHandler(ActionEvent event) throws JDOMException, IOException{
-		Word word = wd.getWordByEn("TempVoc.xml", lbEn.getText());
+	public void btnChHandler(ActionEvent event){
 		lbCh.setText(word.getCh());
 	}
 //	“认识”按键监听
-	public void btnKnownHandler(ActionEvent event) throws JDOMException, IOException{
-		Integer count = Integer.valueOf(lbLearned.getText())+1;
-		lbLearned.setText(count.toString());//设置已学习量
-		Integer todayAmount = Integer.valueOf(lbTodayAmount.getText());
-		if(count.equals(todayAmount)){//当学习完时
-			showInfo("本次学习结束");
-			lbEn.setText("");
-			lbCh.setText("");
-		}else{
-	//        临时词库中know元素+1,时间调整
-	        Integer know = Integer.valueOf(lbWordKnow.getText());
-	        if(know.equals(0)){//认识1次
-	        	wd.updateWordDate_Know("1", "1", lbWordId.getText());
-	        }else if(know.equals(1)){//认识2次
-	        	wd.updateWordDate_Know("2", "2", lbWordId.getText());
-	        }else if(know.equals(2)){//认识3次
-	        	wd.deleteWord("Tempvoc.xml", lbWordId.getText());
-	        }
-	        showNextWord();
+	public void btnKnownHandler(ActionEvent event){
+        String vocName = user.getVocName();
+	    //处理上一个词
+		Integer times = word.getTimes();
+        Integer conquer = word.getConquer();
+        if(times == 1) {
+        	conquer += 3;
+        	word.setTimes(3);
+        	wordDao.update(word,vocName);
+        	if(newSet.contains(word.getId()))
+        		lbLearned.setText((Integer.valueOf(lbLearned.getText())+ 1)+"");
+        	else lbReviewed.setText((Integer.valueOf(lbReviewed.getText())+1)+ "");
 		}
-
+        else times -= 1;
+        word.setTimes(times);
+        word.setConquer(conquer);
+        wordDao.update(word,vocName);
+        //显示下一个词
+        showNextWord(vocName);
 	}
 //	“掌握”按键监听
-	public void btnMemorizedHandler(ActionEvent event) throws JDOMException, IOException{
-		Integer count = Integer.valueOf(lbLearned.getText())+1;
-		lbLearned.setText(count.toString());//设置已学习量
-		Integer todayAmount = Integer.valueOf(lbTodayAmount.getText());
-		if(count.equals(todayAmount)){//当学习完时
-			showInfo("本次学习结束");
-			lbEn.setText("");
-		}else{
-	//        临时词库中删除元素
-			wd.deleteWord("Tempvoc.xml", lbWordId.getText());
-		}
-		showNextWord();
+	public void btnMemorizedHandler(ActionEvent event){
+		String vocName = user.getVocName();
+		wordDao.delete(word.getId(),vocName);
+		VocDaoImpl vocDao = new VocDaoImpl();
+
+        if(newSet.contains(word.getId()))
+            lbLearned.setText((Integer.valueOf(lbLearned.getText())+ 1)+"");
+        else lbReviewed.setText((Integer.valueOf(lbReviewed.getText())+1)+ "");
+
+		if(vocDao.getVocSize(vocName) == 0){
+			//删除词库，提示更换词库
+			vocDao.delete(vocName);
+			showInfo(vocName.split("_")[0] +" 已学完，请更换词库");
+		}else showNextWord(vocName);
 	}
 //	“不认识”按键监听
-	public void btnUnknowHandler(ActionEvent event) throws JDOMException, IOException{
-		Integer count = Integer.valueOf(lbLearned.getText())+1;
-		lbLearned.setText(count.toString());//设置已学习量
-		Integer todayAmount = Integer.valueOf(lbTodayAmount.getText());
-		if(count.equals(todayAmount)){//当学习完时
-			showInfo("本次学习结束");
-			lbEn.setText("");
-		}else{
-//			Calendar cal = Calendar.getInstance();
-	//        临时词库中know元素、时间调整
-//			System.out.println("lbWordKnow.getText():"+lbWordKnow.getText());
-	        Integer know = Integer.valueOf(lbWordKnow.getText());
-	        if(know.equals(0)){//know=0时不认识
-	        	wd.updateWordDate_Know("1", "0", lbWordId.getText());
-	        }else if(know.equals(1)) {//know=1时不认识
-	        	wd.updateWordDate_Know("1", "0", lbWordId.getText());
-	        }else if(know.equals(2)){
-	        	wd.updateWordDate_Know("2", "1", lbWordId.getText());
-	        }
-	        showNextWord();
-		}
+	public void btnUnknowHandler(ActionEvent event){
+		String vocName = user.getVocName();
+		//处理上一个词
+		Integer times = word.getTimes();
+		Integer conquer = word.getConquer();
+		if(times < 3) times += 1;
+		word.setTimes(times);
+		wordDao.update(word,vocName);
+		//显示下一个词
+		showNextWord(vocName);
 	}
 //	导入txt上下行格式词库
 	public void importTxt2Handler(ActionEvent event){
@@ -180,59 +157,45 @@ public class MyController implements Initializable{
 		//显示学习量选择框，将选择的数值保存到Property.xml中
 		showSetQuoraDialog();
 	}
-	public void setVocHandler(ActionEvent event) throws IOException{
+
+	//设置使用的词库
+	public void setVocHandler(ActionEvent event){
 		Stage setVoc = new Stage();
 		VBox root = new VBox();
 		Label lbVocList = new Label("词汇列表");
 		Label lbSelectedVoc = new Label();
 		Button btnOk = new Button("确定");
+		String oldVocName = lbVocName.getText();
 		btnOk.setOnAction(e -> {
-			String vocName = lbSelectedVoc.getText();
-			//获取词库词量
-			Integer amount = null;
-			try {
-				amount = GetAmount.getAmount("VocaList/"+vocName, "word");
-				//将词库名称和词量显示在主界面
-				lbVocName.setText(vocName.substring(0, (vocName.length()-4)));//去掉.xml后缀
-				lbAmount.setText(amount.toString());
-				//将词库名称和词量保存到Property中
-				saveVocName_Amount();
-				pd.setDay("0");//将Property中的day设置为0
-			} catch (JDOMException | IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-	        setVoc.close();
-	        //创建临时词库
-	        ParseXml ph = new ParseXml();
-	        Word word = null;
-	        Set<Integer> set = new LinkedHashSet<>();//存放随机数，避免重复
-	        Random rd = new Random();
-	        try {
-	        	Integer i;
-	        	for(Integer j= 1; j<amount+1; j++){
-	        		do{
-	    				i = rd.nextInt(amount)+1;
-	    			  }while(set.contains(i));
-	        		set.add(i);
-//	        		System.out.println("i:"+i);
-	        		word = wd.getWordById(vocName, i.toString());//取出Word对象
-	        		ph.creatTempXml(word, j.toString());//写入Word对象到临时词库
-	    		}
-			} catch (JDOMException | IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-
-	    });
-		List<File> files = GetVocList.getVocList();
+			String vocName = lbSelectedVoc.getText();//选择的词库名
+			VocNameDaoImpl vocNameDao = new VocNameDaoImpl();
+			VocName vocNameObj = vocNameDao.load(vocName);
+			//----------
+			UserDao userDao = new UserDaoImpl();
+			User user = userDao.load(lbUid.getText());
+			String userVocName = vocName + "_"+ user.getUsername();
+//            System.out.println("userVocName = " + userVocName);
+			VocDao vocDao = new VocDaoImpl();
+			//旧词库不存在的情况
+			if(vocNameDao.ifVocNameExists(userVocName)== 0) vocDao.create(userVocName, vocName);
+			//将用户词库名称和词库词量（用于初始化时在主界面上显示词量）添加到user表中
+			user.setVocName(userVocName);
+			user.setTotal(vocNameObj.getWordAmount());
+			userDao.mod(user);
+			//将词库名称和词量显示在主界面
+			lbVocName.setText(vocName);
+			lbAmount.setText(vocNameObj.getWordAmount());
+			setVoc.close();
+		});
+		//在lbSelectedVoc上显示词库列表
+		VocNameDao vocNameDao = new VocNameDaoImpl();
+		List<VocName> vocnames = vocNameDao.findAll();
 		ObservableList<String> vocs = FXCollections.observableArrayList();
-		for(File file: files){
-			String _fileName = file.toString().substring(file.toString().lastIndexOf("\\")+1);//截取词库文件名
-//			System.out.println(_fileName);
-			vocs.add(_fileName);
+		for (VocName vocname : vocnames) {
+			vocs.add(vocname.getName()/*+ "  词量："+ vocname.getWordAmount()*/);//todo,先不加词量
 		}
-		ListView<String> vocList = new ListView<String>(vocs);//添加到TreeView中
+
+		ListView<String> vocList = new ListView<>(vocs);//添加到TreeView中
 		MultipleSelectionModel<String> sm = vocList.getSelectionModel();//获取选择模型
 		sm.selectedItemProperty().addListener(new ChangeListener<String>() {
 			public void changed(ObservableValue<? extends String> changed,
@@ -246,71 +209,70 @@ public class MyController implements Initializable{
 	}
 //	"开始"按键监听
 	public void btnStartHandler(ActionEvent event) throws JDOMException, IOException{
-		if((new File("TempVoc.xml")).exists()){//先判断是否已生成临时词库
-//			将所有date>0的词的date-1
-			wd.updateDate();
+		//用户在按开始前其他键的处理，其他键不能被按,先将4个键设为disaable，点开始后再设置可用
+		btnCh.setDisable(false);
+		btnKnown.setDisable(false);
+		btnMemorized.setDisable(false);
+		btnNext.setDisable(false);
+		//已学新词和已复习词的数量初始化
+		lbLearned.setText("0");
+		lbReviewed.setText("0");
+        VocDaoImpl vocDao = new VocDaoImpl();
+        String quota = user.getQuota();
+        int nullConquerCount = vocDao.getNullConquerCount(user.getVocName());
+        if(nullConquerCount < Integer.valueOf(quota))
+            lbTodayAmount.setText(nullConquerCount+"");
+        else lbTodayAmount.setText(quota);
+		lbTodayAmount.setText(quota);
+		int reviewCount = vocDao.getReviewCount(user.getVocName());
+		lbReviewAmount.setText(reviewCount+ "");
+        UserDaoImpl userDao = new UserDaoImpl();
+        User user = userDao.load(lbUid.getText());
 
-//			获取Property中的day,将其+1
-			Property pro = null;
-			try {
-				pro = pd.getProperty("1");
-			} catch (JDOMException | IOException e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
+        String vocName = user.getVocName();
+		if(Objects.equals(vocName, null) || vocName.equals("")) showInfo("请先选择词库！");//先判断是否已生成临时词库
+        else{
+        	if(Objects.equals(user.getQuota(),null) || user.getQuota().equals("")
+					|| user.getQuota().equals("null"))
+        		showInfo("请先设置每次背词数量！");
+			else{
+//				System.out.println(user.getQuota());
+//			将conquer >1的值-1
+				wordDao.updateConquer(vocName);
+				newSet = new HashSet<>();
+
+				showNextWord(vocName);
 			}
-			Integer day = Integer.valueOf(pro.getDay());
-			Integer _day = day+1;
-//			将+1后的day保存到Property中
-			pd.setDay(_day.toString());
-			System.out.println("day in Property:"+day);
-			/**********************设置临时词库date****************************/
-			String vocName = lbVocName.getText();
-			Integer amount = GetAmount.getAmount("VocaList/"+vocName+".xml", "word");
-	        int quota = Integer.parseInt(lbQuota.getText());//每天学习量
-	        int days = amount/quota;//新词被分成的份数-1,也是新词总共学习的天数-1
-	        try {
-	        	if(day<days){
-//	        		将本次要学的quota个新词的date设置为0
-		        	Integer id;
-		        	for(id= day*quota; id<day*quota+quota+1; id=id+1){
-		        		wd.updateWordDate("0", id.toString());//将本次要学的quota个新词的date设置为0
-		    		}
-	        	}else if(day.equals(days)){
-	        		//当背到最后一天时，剩余的词汇可能不足一天的quota量，特殊处理
-		        	for(Integer j= days*quota; j<amount+1; j++){
-		        		wd.updateWordDate("0", j.toString());
-		        	}
-	        	}else{
-	        		//do nothing
-	        	}
-
-			} catch (JDOMException | IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-//			设置今天要学习的量
-			Integer todayAmount = wd.getTodayAmount("TempVoc.xml", "0");
-			lbTodayAmount.setText(todayAmount.toString());
-//			显示单词信息
-	        showNextWord();
-
-		}else{
-			showInfo("请先选择词库！");
 		}
 	}
 
 //	--------------------------------------------
-
-	public void showNextWord() throws JDOMException, IOException{
-
-    	//		显示单词信息
-        Word word = wd.getWordByDate("TempVoc.xml", "0");
-        lbWordId.setText(word.getId());
-        lbWordKnow.setText(word.getKnow());
-        lbEn.setText(word.getEn());
+/*新词时将其conquer和times初始化 */
+	public void showNextWord(String vocName) {
+		word = null;
+		//查询生词
+		if (newSet.size() < Integer.valueOf(lbTodayAmount.getText())) {
+			word = wordDao.getByRandomNew(vocName);
+			word.setConquer(1);
+			word.setTimes(3);
+			wordDao.update(word,vocName);
+			newSet.add(Integer.valueOf(word.getId()));
+			System.out.println("newSet = " + newSet);
+		} else{
+			//	复习单词
+			word = wordDao.getByRandom(vocName);
+		}
+        if(word == null ){
+        	showInfo("本次学习结束！");
+			newSet.clear();
+		}
+        else {
+            //		显示单词信息
+            lbEn.setText(word.getEn());
 //        System.out.println("word.getEn:"+word.getEn());
 //        lbCh清空
-        lbCh.setText(null);
+            lbCh.setText(null);
+        }
 	}
 	public void showInfo(String content){
 		Platform.runLater(() ->{
@@ -371,22 +333,11 @@ public class MyController implements Initializable{
 	    tf.setPrefColumnCount(4);
 	    Button closeBtn = new Button("确定");
 	    closeBtn.setOnAction(e -> {
-//	    	将入户输入的数字保存到Property.xml中
-	    	Property ppt = new Property();
-	    	ppt.setQuota(tf.getText());
-	    	ppt.setId(lbId.getText());
-	    	ppt.setVocName(lbVocName.getText());
-	    	ppt.setTotal(lbAmount.getText());
-	    	ppt.setDay("0");
-	    	PropertyDao ppd = new PropertyDao();
-	    	try {
-				ppd.setProperty(ppt);
-			} catch (JDOMException | IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-	    	lbQuota.setText(tf.getText());
-	        popup.close();
+//	    	将入户输入的数字保存到user表中
+            user.setQuota(tf.getText());
+            userDao.mod(user);
+            lbQuota.setText(tf.getText());
+            popup.close();
 	    });
 	    VBox root = new VBox();
 	    root.setPadding(new Insets(10));
@@ -415,17 +366,17 @@ public class MyController implements Initializable{
 	    thread.start();
 	}
 
+	/*没有使用该方法*/
 	public void saveVocName_Amount(){
 		Property ppt = new Property();
     	ppt.setTotal(lbAmount.getText());
     	ppt.setQuota("50");//默认学习量50
-    	ppt.setId(lbId.getText());
+    	ppt.setId(lbUid.getText());
     	ppt.setVocName(lbVocName.getText());
     	PropertyDao ppd = new PropertyDao();
     	try {
 			ppd.setProperty(ppt);
 		} catch (JDOMException | IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}

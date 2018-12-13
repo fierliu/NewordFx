@@ -10,7 +10,10 @@ import org.jdom2.input.SAXBuilder;
 
 import model.Word;
 import tool.SaveXml;
-
+/*
+*最初用于操作xml类型的词库
+ *  计划后期用于生成原始词库时对词的操作
+* */
 public class WordDao {
 //读和查取单词，条件是日期
 	public Word getWordByDate(String vocName, String _date) throws JDOMException, IOException{
